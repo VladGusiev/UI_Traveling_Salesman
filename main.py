@@ -1,4 +1,3 @@
-# GENETIC ALGORITHM
 import copy
 import math
 import time
@@ -6,7 +5,9 @@ import time
 import matplotlib.pyplot as plt
 import random
 
-POPULATION_AMOUNT = 100
+
+# ------------------- # GENETIC ALGORITHM # ------------------- #
+POPULATION_AMOUNT = 500
 CITIES_NUMBER = 0  # will be set in generate_cities()
 
 # Initial generation of cities
@@ -113,7 +114,7 @@ def roulette_selection(population):
             return copy.deepcopy(population[i])
 
 
-def main(points_array):
+def genetic_algorithm(points_array):
     population = generate_first_generation(points_array)
     generation = 1
     found = False
@@ -130,13 +131,12 @@ def main(points_array):
             found = True
             break
 
-
         new_generation = []
         new_parents_amount = int((10 * POPULATION_AMOUNT) / 100)  # 10% of population
 
         choice_of_parent_method = random.randrange(1, 3, 1)
         if choice_of_parent_method == 1:
-        #  ----------- RULETTE ------------------------
+            #  ----------- RULETTE ------------------------
             parents_for_next_generation = []
             for _ in range(new_parents_amount):
                 parents_for_next_generation.append(roulette_selection(population))
@@ -182,17 +182,17 @@ def main(points_array):
             convergence_counter = 2500
 
             print(f"Generation: {generation}\tString: {population[0].chromosomes}\tFitness: {population[0].fitness}")
-            x, y = zip(*population[0].chromosomes)
-            # connect first and last point of the graph
-            x = list(x) + [x[0]]
-            y = list(y) + [y[0]]
-            plt.plot(x, y, marker='o', linestyle='solid')
-            plt.xlabel('X')
-            plt.ylabel('Y')
-            plt.title('Traveling Salesman Genetic Algorithm')
-            plt.grid(True)
-            plt.show()
-            plt.pause(0.05)
+            # x, y = zip(*population[0].chromosomes)
+            # # connect first and last point of the graph
+            # x = list(x) + [x[0]]
+            # y = list(y) + [y[0]]
+            # plt.plot(x, y, marker='o', linestyle='solid')
+            # plt.xlabel('X')
+            # plt.ylabel('Y')
+            # plt.title('Traveling Salesman Genetic Algorithm')
+            # plt.grid(True)
+            # plt.show()
+            # plt.pause(0.05)
             # replace old population with new one only if new one is better
             population = copy.deepcopy(new_generation)
         else:
@@ -212,7 +212,13 @@ def main(points_array):
     plt.grid(True)
     plt.show()
 
+# ------------------- # TABOO SEARCH # ------------------- #
+
+
+def main(points_array):
+    genetic_algorithm(points_array)
+
 
 if __name__ == '__main__':
     input_array = generate_cities()
-    main(input_array)
+    main([[28, 92], [156, 18], [56, 90], [128, 72], [181, 177], [47, 58], [139, 110], [174, 17], [22, 113], [148, 126], [190, 166], [163, 198], [129, 158], [56, 102], [115, 29], [9, 45], [116, 10], [33, 72], [41, 21], [12, 84], [4, 147], [115, 152], [192, 106], [126, 160], [39, 55], [73, 91]])
