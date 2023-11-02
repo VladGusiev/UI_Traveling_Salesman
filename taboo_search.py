@@ -16,6 +16,16 @@ def generate_cities():
     for i in range(CITIES_NUMBER):
         cities_array.append([random.randrange(200), random.randrange(200)])
     print(cities_array)
+    print("START RESULT")
+    x, y = zip(*cities_array)  # Unzip the points into separate x and y arrays
+    x = list(x) + [x[0]]
+    y = list(y) + [y[0]]
+    plt.plot(x, y, marker='o', linestyle='solid')
+    plt.xlabel('X')
+    plt.ylabel('Y')
+    plt.title('Traveling Salesman Genetic Algorithm')
+    plt.grid(True)
+    plt.show()
     return cities_array
 
 
@@ -38,17 +48,23 @@ class Individual:
         total_length += first_and_last_cite_distance
 
         return 1/total_length  # closer number to 1 -> shorter road!
-        # MUTATION -> switching 2 genes
 
-    def mutate(self):
-        mutation_type = random.randrange(1, 3, 1)
+def generate_neighborhoods(current_permutation):
+    neighborhoods = []
+    for i in range(len(current_permutation.cities_array)):
+        for j in range(i + 1, len(current_permutation.cities_array)):
+            new_permutation = copy.deepcopy(current_permutation)
+            new_permutation.cities_array[i], new_permutation.cities_array[j] = new_permutation.cities_array[j], new_permutation.cities_array[i]
+            new_permutation.fitness = new_permutation.calculate_fitness()  # recalculating fitness
+            neighborhoods.append(new_permutation)
+    return neighborhoods
 
-        #  switch genes next to each other
-        if mutation_type == 1:
-            #                                      inc          not incl
-            mutated_gene = random.randrange(1, len(self.cities_array))
-            self.cities_array[mutated_gene], self.cities_array[mutated_gene - 1] = self.cities_array[mutated_gene - 1], \
-            self.cities_array[mutated_gene]
+def find_best_neighborhood(neighborhoods):
+    best_neighborhood = neighborhoods[0]
+    for neighborhood in neighborhoods:
+        if neighborhood.fitness > best_neighborhood.fitness:
+            best_neighborhood = neighborhood
+    return best_neighborhood
 
 
 def main(points_array):
@@ -56,36 +72,30 @@ def main(points_array):
 
     found = False
     iteration = 1
-    max_iteration_counter = 2500
+    convergence_counter = 1000
 
-    all_time_best_fitness = current_permutation.fitness
     all_time_best_permutation = copy.deepcopy(current_permutation)
 
     taboo_list = [current_permutation]
 
     while not found:
 
-        if iteration >= max_iteration_counter:
+        if convergence_counter <= 0:
             found = True
             break
 
         # generate neighborhoods
-        neighborhoods = []
-        for i in range(len(current_permutation.cities_array)):
-            for j in range(i + 1, len(current_permutation.cities_array)):
-                new_permutation = copy.deepcopy(current_permutation)
-                new_permutation.cities_array[i], new_permutation.cities_array[j] = new_permutation.cities_array[j], new_permutation.cities_array[i]
-                new_permutation.fitness = new_permutation.calculate_fitness()  # recalculating fitness
-                neighborhoods.append(new_permutation)
+        neighborhoods = generate_neighborhoods(current_permutation)
 
         # find best neighborhood
-        best_neighborhood = neighborhoods[0]
-        for neighborhood in neighborhoods:
-            if neighborhood.fitness > best_neighborhood.fitness:
-                best_neighborhood = neighborhood
+        best_neighborhood = find_best_neighborhood(neighborhoods)
 
         # check if best neighborhood is in taboo list
-        if best_neighborhood in taboo_list:
+        while best_neighborhood in taboo_list:
+            if len(neighborhoods) == 1:
+                neighborhoods = generate_neighborhoods(current_permutation)
+                best_neighborhood = find_best_neighborhood(neighborhoods)
+                break
             # if yes, remove it and find new best neighborhood
             neighborhoods.remove(best_neighborhood)
             best_neighborhood = neighborhoods[0]
@@ -95,21 +105,25 @@ def main(points_array):
 
         # check if best neighborhood is better than current permutation
         if best_neighborhood.fitness > current_permutation.fitness:
-            current_permutation = best_neighborhood
-            taboo_list.append(best_neighborhood)
-            if len(taboo_list) > 200:
-                taboo_list.pop(0)
+            current_permutation = copy.deepcopy(best_neighborhood)
+            # check if best neighborhood is better than all time best permutation
+            if best_neighborhood.fitness > all_time_best_permutation.fitness:
+                all_time_best_permutation = copy.deepcopy(best_neighborhood)
+                convergence_counter = 1000
+            else:
+                convergence_counter -= 1
 
-        # check if best neighborhood is better than all time best permutation
-        if best_neighborhood.fitness > all_time_best_permutation.fitness:
-            all_time_best_permutation = best_neighborhood
-            all_time_best_fitness = best_neighborhood.fitness
+        if best_neighborhood.fitness < current_permutation.fitness:
+            taboo_list.append(current_permutation)
+            if len(taboo_list) > 50:
+                taboo_list.pop(0)
+            current_permutation = copy.deepcopy(best_neighborhood)
 
         iteration += 1
 
 
     print(
-        f"Generation: {iteration}\tString: {all_time_best_permutation.cities_array}\tFitness: {all_time_best_fitness}")
+        f"Generation: {iteration}\tString: {all_time_best_permutation.cities_array}\tFitness: {all_time_best_permutation.fitness}")
     x, y = zip(*current_permutation.cities_array)
     # connect first and last point of the graph
     x = list(x) + [x[0]]
@@ -121,8 +135,6 @@ def main(points_array):
     plt.grid(True)
     plt.show()
     plt.pause(0.05)
-
-
 
 
 if __name__ == '__main__':

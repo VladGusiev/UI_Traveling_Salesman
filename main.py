@@ -14,10 +14,20 @@ CITIES_NUMBER = 0  # will be set in generate_cities()
 def generate_cities():
     cities_array = []
     global CITIES_NUMBER
-    # CITIES_NUMBER = random.randrange(20, 40)
-    CITIES_NUMBER = random.randrange(10, 11)
+    CITIES_NUMBER = random.randrange(20, 40)
+    # CITIES_NUMBER = random.randrange(10, 11)
     for i in range(CITIES_NUMBER):
         cities_array.append([random.randrange(200), random.randrange(200)])
+    print("START RESULT")
+    x, y = zip(*cities_array)  # Unzip the points into separate x and y arrays
+    x = list(x) + [x[0]]
+    y = list(y) + [y[0]]
+    plt.plot(x, y, marker='o', linestyle='solid')
+    plt.xlabel('X')
+    plt.ylabel('Y')
+    plt.title('Traveling Salesman Genetic Algorithm')
+    plt.grid(True)
+    plt.show()
     print(cities_array)
     return cities_array
 
@@ -118,7 +128,7 @@ def genetic_algorithm(points_array):
     population = generate_first_generation(points_array)
     generation = 1
     found = False
-    convergence_counter = 2500
+    convergence_counter = 1000
     all_time_best_fit = 0
     all_time_best_permutation = []
     new_generation = []
@@ -158,13 +168,14 @@ def genetic_algorithm(points_array):
             elitists = int((10 * POPULATION_AMOUNT) / 100)
             new_generation.extend(population[:elitists])
 
-            # From new generation which has 10% of fittest from past gen, new offspring will be created
+            # remaining population is created by mating 50% of fittest individuals
             remaining_population = int((90 * POPULATION_AMOUNT) / 100)
+            percentage_of_fittest = int((30 * POPULATION_AMOUNT) / 100)
             for _ in range(remaining_population):
-                # parent1 = random.choice(population[:POPULATION_AMOUNT // 2])
-                # parent2 = random.choice(population[:POPULATION_AMOUNT // 2])
-                parent1 = random.choice(new_generation)
-                parent2 = random.choice(new_generation)
+                parent1 = random.choice(population[:percentage_of_fittest])
+                parent2 = random.choice(population[:percentage_of_fittest])
+                # parent1 = random.choice(new_generation)
+                # parent2 = random.choice(new_generation)
                 child = parent1.create_offspring(parent2)
 
                 # occasional mutation
@@ -179,25 +190,15 @@ def genetic_algorithm(points_array):
         if (new_generation[0].fitness > all_time_best_fit) and (new_generation[0].fitness > population[0].fitness):
             all_time_best_fit = new_generation[0].fitness
             all_time_best_permutation = copy.deepcopy(new_generation[0].chromosomes)
-            convergence_counter = 2500
+            convergence_counter = 1000
 
             print(f"Generation: {generation}\tString: {population[0].chromosomes}\tFitness: {population[0].fitness}")
-            # x, y = zip(*population[0].chromosomes)
-            # # connect first and last point of the graph
-            # x = list(x) + [x[0]]
-            # y = list(y) + [y[0]]
-            # plt.plot(x, y, marker='o', linestyle='solid')
-            # plt.xlabel('X')
-            # plt.ylabel('Y')
-            # plt.title('Traveling Salesman Genetic Algorithm')
-            # plt.grid(True)
-            # plt.show()
-            # plt.pause(0.05)
-            # replace old population with new one only if new one is better
             population = copy.deepcopy(new_generation)
+
         else:
             convergence_counter -= 1
         generation += 1
+        # population = copy.deepcopy(new_generation)
 
     # print best result
     print("FINAL RESULT")
@@ -212,13 +213,10 @@ def genetic_algorithm(points_array):
     plt.grid(True)
     plt.show()
 
-# ------------------- # TABOO SEARCH # ------------------- #
-
-
 def main(points_array):
     genetic_algorithm(points_array)
 
 
 if __name__ == '__main__':
     input_array = generate_cities()
-    main([[28, 92], [156, 18], [56, 90], [128, 72], [181, 177], [47, 58], [139, 110], [174, 17], [22, 113], [148, 126], [190, 166], [163, 198], [129, 158], [56, 102], [115, 29], [9, 45], [116, 10], [33, 72], [41, 21], [12, 84], [4, 147], [115, 152], [192, 106], [126, 160], [39, 55], [73, 91]])
+    main(input_array)
