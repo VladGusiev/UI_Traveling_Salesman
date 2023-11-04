@@ -11,19 +11,20 @@ CITIES_NUMBER = 0  # will be set in generate_cities()
 def generate_cities():
     cities_array = []
     global CITIES_NUMBER
-    CITIES_NUMBER = random.randrange(20, 40)
-    # CITIES_NUMBER = random.randrange(10, 11)
+    CITIES_NUMBER = random.randrange(35, 40)
+    # CITIES_NUMBER = random.randrange(10, 14)
     for i in range(CITIES_NUMBER):
         cities_array.append([random.randrange(200), random.randrange(200)])
+
+    print("START Map")
     print(cities_array)
-    print("START RESULT")
     x, y = zip(*cities_array)  # Unzip the points into separate x and y arrays
     x = list(x) + [x[0]]
     y = list(y) + [y[0]]
     plt.plot(x, y, marker='o', linestyle='solid')
     plt.xlabel('X')
     plt.ylabel('Y')
-    plt.title('Traveling Salesman Genetic Algorithm')
+    plt.title('Traveling Salesman Taboo Search')
     plt.grid(True)
     plt.show()
     return cities_array
@@ -58,6 +59,7 @@ def generate_neighborhoods(current_permutation):
             new_permutation.fitness = new_permutation.calculate_fitness()  # recalculating fitness
             neighborhoods.append(new_permutation)
     return neighborhoods
+
 
 def find_best_neighborhood(neighborhoods):
     best_neighborhood = neighborhoods[0]
@@ -109,11 +111,11 @@ def main(points_array):
             # check if best neighborhood is better than all time best permutation
             if best_neighborhood.fitness > all_time_best_permutation.fitness:
                 all_time_best_permutation = copy.deepcopy(best_neighborhood)
+                print(f"Generation: {iteration}\tString: {all_time_best_permutation.cities_array}\tFitness: {all_time_best_permutation.fitness}")
                 convergence_counter = 1000
             else:
                 convergence_counter -= 1
-
-        if best_neighborhood.fitness < current_permutation.fitness:
+        else:
             taboo_list.append(current_permutation)
             if len(taboo_list) > 50:
                 taboo_list.pop(0)
@@ -139,4 +141,4 @@ def main(points_array):
 
 if __name__ == '__main__':
     input_array = generate_cities()
-    main(input_array)
+    main(generate_cities())

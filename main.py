@@ -1,11 +1,11 @@
 import copy
 import math
-import time
 
 import matplotlib.pyplot as plt
 import random
 
 
+# TODO TO CHANGE SELECTION TYPE GO TO LINE 163
 # ------------------- # GENETIC ALGORITHM # ------------------- #
 POPULATION_AMOUNT = 500
 CITIES_NUMBER = 0  # will be set in generate_cities()
@@ -15,10 +15,10 @@ def generate_cities():
     cities_array = []
     global CITIES_NUMBER
     CITIES_NUMBER = random.randrange(20, 40)
-    # CITIES_NUMBER = random.randrange(10, 11)
+    # CITIES_NUMBER = random.randrange(10, 13)
     for i in range(CITIES_NUMBER):
         cities_array.append([random.randrange(200), random.randrange(200)])
-    print("START RESULT")
+    print("START array")
     x, y = zip(*cities_array)  # Unzip the points into separate x and y arrays
     x = list(x) + [x[0]]
     y = list(y) + [y[0]]
@@ -144,47 +144,42 @@ def genetic_algorithm(points_array):
         new_generation = []
         new_parents_amount = int((10 * POPULATION_AMOUNT) / 100)  # 10% of population
 
-        choice_of_parent_method = random.randrange(1, 3, 1)
-        if choice_of_parent_method == 1:
-            #  ----------- RULETTE ------------------------
-            parents_for_next_generation = []
-            for _ in range(new_parents_amount):
-                parents_for_next_generation.append(roulette_selection(population))
+         #----------- ROULETTE ------------------------
+        parents_for_next_generation = []
+        for _ in range(new_parents_amount):
+            parents_for_next_generation.append(roulette_selection(population))
 
-            for _ in range(CITIES_NUMBER):
-                parent1 = random.choice(parents_for_next_generation)
-                parent2 = random.choice(parents_for_next_generation)
-                child = parent1.create_offspring(parent2)
+        for _ in range(CITIES_NUMBER):
+            parent1 = random.choice(parents_for_next_generation)
+            parent2 = random.choice(parents_for_next_generation)
+            child = parent1.create_offspring(parent2)
 
-                # occasional mutation
-                mutation_chance = random.random()
-                if mutation_chance <= 0.1:
-                    child.mutate()
+            # occasional mutation
+            mutation_chance = random.random()
+            if mutation_chance <= 0.1:
+                child.mutate()
 
-                new_generation.append(copy.deepcopy(child))
-        else:
-            #  ----------- ELITISM ------------------------
-            # 10% of fittest population goes to the next generation
-            elitists = int((10 * POPULATION_AMOUNT) / 100)
-            new_generation.extend(population[:elitists])
-
-            # remaining population is created by mating 50% of fittest individuals
-            remaining_population = int((90 * POPULATION_AMOUNT) / 100)
-            percentage_of_fittest = int((30 * POPULATION_AMOUNT) / 100)
-            for _ in range(remaining_population):
-                parent1 = random.choice(population[:percentage_of_fittest])
-                parent2 = random.choice(population[:percentage_of_fittest])
-                # parent1 = random.choice(new_generation)
-                # parent2 = random.choice(new_generation)
-                child = parent1.create_offspring(parent2)
-
-                # occasional mutation
-                mutation_chance = random.random()
-                if mutation_chance <= 0.1:
-                    child.mutate()
-
-                new_generation.append(copy.deepcopy(child))
-
+            new_generation.append(copy.deepcopy(child))
+        #  ----------- ELITISM ------------------------
+        # 10% of fittest population goes to the next generation
+        # elitists = int((10 * POPULATION_AMOUNT) / 100)
+        # new_generation.extend(population[:elitists])
+        #
+        # # remaining population is created by mating 50% of fittest individuals
+        # remaining_population = int((90 * POPULATION_AMOUNT) / 100)
+        # percentage_of_fittest = int((30 * POPULATION_AMOUNT) / 100)  # 30% of population
+        # for _ in range(remaining_population):
+        #     parent1 = random.choice(population[:percentage_of_fittest])
+        #     parent2 = random.choice(population[:percentage_of_fittest])
+        #     child = parent1.create_offspring(parent2)
+        #
+        #     # occasional mutation
+        #     mutation_chance = random.random()
+        #     if mutation_chance <= 0.1:
+        #         child.mutate()
+        #
+        #     new_generation.append(copy.deepcopy(child))
+        #
         new_generation = sorted(new_generation, key=lambda x: x.fitness, reverse=True)
 
         if (new_generation[0].fitness > all_time_best_fit) and (new_generation[0].fitness > population[0].fitness):
@@ -193,12 +188,12 @@ def genetic_algorithm(points_array):
             convergence_counter = 1000
 
             print(f"Generation: {generation}\tString: {population[0].chromosomes}\tFitness: {population[0].fitness}")
-            population = copy.deepcopy(new_generation)
 
         else:
             convergence_counter -= 1
+        population = copy.deepcopy(new_generation)
         generation += 1
-        # population = copy.deepcopy(new_generation)
+
 
     # print best result
     print("FINAL RESULT")
